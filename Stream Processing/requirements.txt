@@ -1,0 +1,7 @@
+aiokafka==0.10.0
+annotated-types==0.6.0
+async-timeout==4.0.3
+packaging==23.2
+pydantic==2.6.0
+pydantic_core==2.16.1
+typing_extensions==4.9.0
