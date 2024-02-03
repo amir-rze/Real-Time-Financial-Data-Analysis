@@ -62,7 +62,8 @@ async def ingest_data(
       db: Session = Depends(get_db)):
     
     if isinstance(data, DataIn):
-        # try:
+        # Added try except
+        try:
             data=dict(data)
             score = data['timestamp'].timestamp()
             data['timestamp'] = convert_utc_to_Tehran(data['timestamp'])
@@ -82,11 +83,12 @@ async def ingest_data(
                 logging.info("data sent to client successfully...")
 
             return {"status" : 200 ,"message": "Data ingested successfully"}
-        # except Exception as e:
-        #     db.rollback()
-        #     raise HTTPException(status_code=500, detail=str(e))
-        # finally:
-        #     db.close()
+        # Added try-except clause    
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=500, detail=str(e))
+        finally:
+            db.close()
     elif isinstance(data, AdditionalDataInOrder) or isinstance(data, AdditionalDataInNews)\
             or isinstance(data, AdditionalDataInMarket) or isinstance(data, AdditionalDataInEconomic) :
         data = dict(data)
