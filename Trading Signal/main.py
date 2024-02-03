@@ -23,9 +23,9 @@ def generate_signal(data) :
         current_price = data['current_price']
         
         if current_price < ma and rsi < 30 :
-            signal = "buy"
+            signal = "Buy"
         elif current_price > ma and rsi > 70:
-            signal = "sell"
+            signal = "Sell"
         else:
             signal = "hold"
         logging.info("Trading Signal service generated signal based on metrics ! ")
@@ -66,7 +66,6 @@ def generate_signal(data) :
                 signal =  'Buy'
             elif market_cap < 1e10 and pe_ratio > 20:
                 signal =  'Sell'
-
             logging.info("Trading Signal service generated signal based on market_data ! ")
 
         else:

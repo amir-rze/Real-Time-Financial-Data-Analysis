@@ -1,0 +1,155 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Stock Data App</title>
+      <!-- Link the CSS file -->
+      <link rel="stylesheet" href="style.css">
+  
+  </head>
+  
+<body>
+   
+   <!-- Add a container for the digital watch -->
+   
+   <h1 class="title-text">Stock Market Manager
+    
+   </h1>
+
+  
+
+   <div class="charts-container">
+      
+     
+   <div class="chart-container">
+      <div class="tab-content" id="tab1"> 
+         <h1 class="title-stock">Google</h1>
+         <!-- Content for Tab 1 -->
+         <p>
+             <!-- Canvas element to display the chart -->
+             <canvas  id="googlechart"></canvas>
+         </p>
+      </div>
+      
+      <div class="tab-content" id="tab2"> 
+         <h1 class="title-stock">Apple</h1>
+         <!-- Content for Tab 2 -->
+         <p>
+             <!-- Canvas element to display the chart -->
+             <canvas id="applechart"></canvas>
+         </p>
+      </div>
+      
+      <div class="tab-content" id="tab3">
+         <h1 class="title-stock">Amazon</h1>
+         <!-- Content for Tab 3 -->
+         <p>
+             <!-- Canvas element to display the chart -->
+             <canvas id="amazonchart"></canvas>
+         </p>
+      </div>
+      
+      <div class="tab-content" id="tab4">
+         <h1 class="title-stock">Tesla</h1>
+         <!-- Content for Tab 4 -->
+         <p>
+             <!-- Canvas element to display the chart -->
+             <canvas id="teslachart"></canvas>
+         </p>
+      </div>
+      
+      <div class="tab-content" id="tab5">
+         <h1 class="title-stock">Microsoft</h1>
+         <!-- Content for Tab 5 -->
+         <p>
+             <!-- Canvas element to display the chart -->
+             <canvas id="microsoftchart"></canvas>
+         </p>
+      </div>
+      
+   </div>
+
+   <!-- sidebar -->
+
+   <div class="botton-box">
+
+      <div class="notif">
+
+         <div class="digital-watch" id="digitalWatch" ></div>
+
+         
+
+         <div class="list">
+            <span>Google</span>
+            <span id="lbl_google_signal">-----</span>
+          </div>
+
+          <div class="list">
+            <span>Apple</span>
+            <span id="lbl_apple_signal">-----</span>
+          </div>
+
+          <div class="list">
+            <span>Amazon</span>
+            <span id="lbl_amazon_signal">-----</span>
+          </div>
+
+          <div class="list">
+            <span>Tesla</span>
+            <span id="lbl_tesla_signal">-----</span>
+          </div>
+          
+          <div class="list">
+            <span>Microsoft</span>
+            <span id="lbl_microsoft_signal">-----</span>
+          </div>
+
+      </div>
+
+      <!-- <div class="list" id="mg2">
+         <h3>stock list</h3>
+      </div> -->
+
+      <div class="stock-list">
+
+         <div class="list">
+            <img class="img" src="image/goog.png" alt="">
+            <button class="tab-btn" id="btn-showGoogle" onclick="openTab('tab1', googlechart)">Google</button>
+         </div>
+
+      <div class="list">
+         <img class="img" src="image/appl.png" alt="">
+         <button class="tab-btn" id="btn-showApple" onclick="openTab('tab2', applechart)">Apple</button>
+      </div>
+
+      <div class="list">
+         <img class="img" src="image/aws.png" alt="">
+         <button class="tab-btn" id="btn-showAmazon" onclick="openTab('tab3', amazonchart)">Amazon</button>
+      </div>
+   
+      <div class="list">
+         <img class="img" src="image/tsla.png" alt="">
+         <button class="tab-btn" id="btn-showTesla" onclick="openTab('tab4', teslachart)">Tesla</button>
+      </div>
+
+      <div class="list">
+         <img class="img" src="image/msft.svg" alt="">
+         <button class="tab-btn" id="btn-showMicrosoft" onclick="openTab('tab5', microsoftchart)">Microsoft</button>
+      </div>
+  </div>
+
+
+<!-- Script tags to include the chart library and its dependencies -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.5.1/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-moment/1.0.0/chartjs-adapter-moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-streaming/2.0.0/chartjs-plugin-streaming.min.js"></script>
+     
+<!-- Script tag to link the script.js file -->
+<script src="script.js"></script>
+
+</body>
+</html>

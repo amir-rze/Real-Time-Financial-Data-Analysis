@@ -1,0 +1,54 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+h1, h2 {
+    text-align: center;
+}
+
+#stock-options button {
+    margin: 5px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#stock-options button:hover {
+    background-color: #0056b3;
+}
+
+#chart-container, #stockSummary {
+    width: 600px;
+    margin: 20px auto;
+}
+
+#notifications {
+    width: 600px;
+    margin: 20px auto;
+    padding: 10px;
+    background-color: #ffcc00;
+    color: #333;
+    border-radius: 5px;
+}
+
+#summaryTable {
+    width: 100%;
+    border-collapse: collapse; /* Combine borders into a single line */
+}
+
+/* Style table header cells (th) */
+#summaryTable th {
+    background-color: #f2f2f2;
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+th, td {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+}
