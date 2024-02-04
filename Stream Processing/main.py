@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO)
 
 data_by_symbol = {}
 n = PERIOD
-
+clients = set()
 def moving_average(data, n):
     """
     Calculates the moving average of a stock over a specified number of periods.
@@ -25,24 +25,26 @@ def exponential_moving_average(data, n):
     """
     Calculates the exponential moving average of a stock over a specified number of periods.
     """
+    alpha = 0.4
     return data['closing_price'].ewm(span=n, adjust=False).mean().iloc[-1].item()
 
 def relative_strength_index(data, n):
     """
     Calculates the relative strength index of a stock over a specified number of periods.
     """
-    delta = data['closing_price'].diff(1)
-    gain = (delta.where(delta > 0, 0)).fillna(0)
-    loss = (-delta.where(delta < 0, 0)).fillna(0)
+    delta = data['closing_price'].diff()
+    gain = delta.where(delta > 0, 0)
+    loss = -delta.where(delta < 0, 0)
     
     avg_gain = gain.rolling(window=n, min_periods=1).mean()
     avg_loss = loss.rolling(window=n, min_periods=1).mean()
     
-    rs = avg_gain / avg_loss
+    # Avoid division by zero by setting RS to a high value if avg_loss is 0
+    rs = avg_gain / avg_loss.replace(to_replace=0, value=1e-10)
+    
     rsi = 100 - (100 / (1 + rs))
     
     return rsi.iloc[-1].item()
-
 
 def calculate_metrics(data):
     stock_symbol = data['stock_symbol']
@@ -54,10 +56,8 @@ def calculate_metrics(data):
     for symbol, data in data_by_symbol.items():
         if n < len(data):
             closing_prices = [d['closing_price'] for d in data]
-            print(len(closing_prices))
             current_price = closing_prices[-1]
             closing_prices = closing_prices[:n]
-            print(len(closing_prices))
             closing_prices = pd.DataFrame({'closing_price': closing_prices})
             ma = moving_average(closing_prices, n)
             ema = exponential_moving_average(closing_prices, n)
@@ -92,6 +92,33 @@ async def send_metrics(metrics: Metrics):
         await producer.stop()
 
 
+async def client_handler(reader, writer):
+    clients.add(writer)
+    try:
+        while True:
+            # Here, you could add logic to receive data from the client if needed
+            await asyncio.sleep(1)  # Prevent the loop from closing immediately
+    except asyncio.CancelledError:
+        pass
+    finally:
+        clients.remove(writer)
+        writer.close()
+        await writer.wait_closed()
+
+async def broadcast_realtime_data(data):
+    for writer in list(clients):
+        try:
+            writer.write(json.dumps(data).encode('utf-8'))
+            print(len(clients))
+            await writer.drain()
+            logging.info("Signal sent to client!")
+        except :
+            clients.remove(writer)
+            writer.close()
+            logging.info("Client connection closed.")
+
+
+
 # Define the Kafka consumer
 async def read_data():
     loop = asyncio.get_event_loop()
@@ -104,7 +131,7 @@ async def read_data():
     try:
         async for message in consumer:
             data = message.value
-            print(data)
+            await broadcast_realtime_data(data)
             logging.info("Stream Processing service received data ! ")
             metrics = calculate_metrics(data)
             if metrics is not None:
@@ -113,6 +140,17 @@ async def read_data():
         await consumer.stop()
 
 
-if __name__ == '__main__':
-    asyncio.run(read_data())
+async def start_server(host, port):
+    server = await asyncio.start_server(client_handler, host, port)
+    logging.info(f'Server is listening on {port}...')
+    async with server:
+        await server.serve_forever()
 
+async def main():
+    await asyncio.gather(
+        start_server('localhost', 13524),
+        read_data(),
+    )
+
+if __name__ == '__main__':
+    asyncio.run(main())

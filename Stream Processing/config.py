@@ -1,6 +1,6 @@
 
 # calculating period
-PERIOD = 2
+PERIOD = 7
 
 # Kafka configuration
 KAFKA_BOOTSTRAP_SERVERS = "localhost:9092"
