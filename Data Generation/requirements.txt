@@ -1,0 +1,8 @@
+certifi==2023.11.17
+charset-normalizer==3.3.2
+idna==3.6
+numpy==1.26.3
+psutil==5.9.8
+python-dotenv==1.0.1
+requests==2.31.0
+urllib3==2.2.0

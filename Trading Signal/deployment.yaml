@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trading-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trading
+  template:
+    metadata:
+      labels:
+        app: trading
+    spec:
+      containers:
+      - name: trading
+        image: amirrze/trading:v2.0.0
+        env:
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "kafka-local:9092"

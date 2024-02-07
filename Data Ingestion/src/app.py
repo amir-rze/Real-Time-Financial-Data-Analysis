@@ -7,16 +7,16 @@ from typing import List
 from datetime import datetime, timedelta
 import redis
 from aiokafka import AIOKafkaProducer
-from database import engine,SessionLocal,Base
+from typing import Union
+import logging
+import uvicorn
+from config import KAFKA_BOOTSTRAP_SERVERS,DATA_KAFKA_TOPIC,REDIS_URL,ADDITIONAL_DATA_KAFTA_TOPIC,HOST,PORT
 from sqlalchemy.orm import Session
 from models import Data
 from schemas import DataIn,DataOut,AdditionalDataInEconomic,AdditionalDataInMarket,AdditionalDataInNews,AdditionalDataInOrder
 from utils import convert_datetime_to_str,convert_utc_to_Tehran
-from typing import Union
-import logging
-
-from config import KAFKA_BOOTSTRAP_SERVERS,DATA_KAFKA_TOPIC,REDIS_URL,LOOP,ADDITIONAL_DATA_KAFTA_TOPIC
-
+from database import engine,SessionLocal,Base
+import asyncio
 
 # Create the tables
 Base.metadata.create_all(bind=engine)
@@ -26,7 +26,7 @@ app = FastAPI()
 
 # Configure CORS
 origins = [
-    "*"  # The origin of your frontend
+    "*"  
 ]
 
 app.add_middleware(
@@ -55,7 +55,7 @@ def get_db() :
 # Define the Kafka producer
 async def send_data(data,topic):
     producer = AIOKafkaProducer(
-        bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,loop=LOOP,
+        bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,loop=asyncio.get_event_loop(),
         value_serializer=lambda v: json.dumps(v).encode('utf-8')
         )
     await producer.start()
@@ -78,18 +78,24 @@ async def ingest_data(
     if isinstance(data, DataIn):
         try:
             data=dict(data)
+            score = data['timestamp'].timestamp()
+            # Convert datetime to Asia/Tehran time
             data['timestamp'] = convert_utc_to_Tehran(data['timestamp'])
             db_data = Data(**data)
             db.add(db_data)
             db.commit()
             logging.info("Data Ingestion service stored data in database ! ")
-            score = data['timestamp'].timestamp()
+
+            # Convert datetime to string in order to being serialized 
             data['timestamp'] = convert_datetime_to_str(data['timestamp'])
+            # Add current data to redis 
             redis_client.zadd(f"data:{data['stock_symbol']}", {json.dumps(data): score})
-            # Remove records older than one hour
             one_hour_ago = datetime.now() - timedelta(hours=1)
+            # Remove records older than one hour
             redis_client.zremrangebyscore(f"data:{data['stock_symbol']}", 0, one_hour_ago.timestamp())
             logging.info("Data stored in Redis database ! ")
+
+            # Send data to Stream Processing Service
             await send_data(data,DATA_KAFKA_TOPIC)
             return {"status" : 200 ,"message": "Data ingested successfully"}
         except Exception as e:
@@ -101,6 +107,8 @@ async def ingest_data(
             or isinstance(data, AdditionalDataInMarket) or isinstance(data, AdditionalDataInEconomic) :
         data = dict(data)
         data['timestamp'] = convert_datetime_to_str(data['timestamp'])
+
+        # Send additional-data to Trading Signal service directly 
         await send_data(data,ADDITIONAL_DATA_KAFTA_TOPIC)
         return {"status" : 200 ,"message": "Data ingested successfully"}
     else:
@@ -115,7 +123,8 @@ def read_data(stock: str, db: Session = Depends(get_db)):
     return [json.loads(d) for d in data]
 
 
-
 FastAPICache.init(RedisBackend(redis_client), prefix="data-ingestion-service")
 
 
+if __name__ == "__main__":
+    uvicorn.run('app:app', host=HOST, port=PORT)

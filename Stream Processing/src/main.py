@@ -14,7 +14,11 @@ logging.basicConfig(level=logging.INFO)
 
 data_by_symbol = {}
 n = PERIOD
-clients = set()
+
+
+# clients = set()
+
+
 def moving_average(data, n):
     """
     Calculates the moving average of a stock over a specified number of periods.
@@ -92,33 +96,6 @@ async def send_metrics(metrics: Metrics):
         await producer.stop()
 
 
-async def client_handler(reader, writer):
-    clients.add(writer)
-    try:
-        while True:
-            # Here, you could add logic to receive data from the client if needed
-            await asyncio.sleep(1)  # Prevent the loop from closing immediately
-    except asyncio.CancelledError:
-        pass
-    finally:
-        clients.remove(writer)
-        writer.close()
-        await writer.wait_closed()
-
-async def broadcast_realtime_data(data):
-    for writer in list(clients):
-        try:
-            writer.write(json.dumps(data).encode('utf-8'))
-            print(len(clients))
-            await writer.drain()
-            logging.info("Signal sent to client!")
-        except :
-            clients.remove(writer)
-            writer.close()
-            logging.info("Client connection closed.")
-
-
-
 # Define the Kafka consumer
 async def read_data():
     loop = asyncio.get_event_loop()
@@ -131,7 +108,7 @@ async def read_data():
     try:
         async for message in consumer:
             data = message.value
-            await broadcast_realtime_data(data)
+            # await broadcast_realtime_data(data)
             logging.info("Stream Processing service received data ! ")
             metrics = calculate_metrics(data)
             if metrics is not None:
@@ -139,18 +116,5 @@ async def read_data():
     finally:
         await consumer.stop()
 
-
-async def start_server(host, port):
-    server = await asyncio.start_server(client_handler, host, port)
-    logging.info(f'Server is listening on {port}...')
-    async with server:
-        await server.serve_forever()
-
-async def main():
-    await asyncio.gather(
-        start_server('localhost', 13524),
-        read_data(),
-    )
-
 if __name__ == '__main__':
-    asyncio.run(main())
+    asyncio.run(read_data())

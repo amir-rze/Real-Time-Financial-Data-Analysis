@@ -3,9 +3,13 @@ from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 import json
 import logging
 import asyncio
-from config import KAFKA_BOOTSTRAP_SERVERS,SIGNAL_KAFKA_TOPIC
+from config import KAFKA_BOOTSTRAP_SERVERS,SIGNAL_KAFKA_TOPIC,DATA_KAFKA_TOPIC,HOST,PORT
 
 clients = set()
+
+topic_list=[]
+topic_list.append(DATA_KAFKA_TOPIC)
+topic_list.append(SIGNAL_KAFKA_TOPIC)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -22,12 +26,12 @@ async def client_handler(reader, writer):
         writer.close()
         await writer.wait_closed()
 
-async def broadcast_signal(msg):
+async def broadcast_data(data):
     for writer in list(clients):
         try:
-            writer.write(msg.encode('utf-8'))
+            writer.write(json.dumps(data).encode('utf-8'))
             await writer.drain()
-            logging.info("Signal sent to client!")
+            logging.info("Data sent to client!")
         except :
             clients.remove(writer)
             writer.close()
@@ -36,7 +40,7 @@ async def broadcast_signal(msg):
 
 async def read_data():
     consumer = AIOKafkaConsumer(
-        SIGNAL_KAFKA_TOPIC,
+        *topic_list,
         loop=asyncio.get_event_loop(),
         bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
         value_deserializer=lambda m: json.loads(m.decode('utf-8'))
@@ -46,8 +50,7 @@ async def read_data():
         async for message in consumer:
             data = message.value
             logging.info("Notification Service received data!")
-            msg = f"{data['signal']} {data['stock_symbol']} shares !!!"
-            await broadcast_signal(msg)
+            await broadcast_data(data)
     finally:
         await consumer.stop()
 
@@ -59,7 +62,7 @@ async def start_server(host, port):
 
 async def main():
     await asyncio.gather(
-        start_server('localhost', 12345),
+        start_server(HOST, PORT),
         read_data(),
     )
 

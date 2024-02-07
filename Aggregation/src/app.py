@@ -5,8 +5,8 @@ import asyncio
 from typing import List
 from fastapi import FastAPI, HTTPException,Depends,Request,status
 from sqlalchemy.orm import Session
-
-from config import KAFKA_BOOTSTRAP_SERVERS,SIGNAL_KAFKA_TOPIC
+import uvicorn
+from config import KAFKA_BOOTSTRAP_SERVERS,SIGNAL_KAFKA_TOPIC,HOST,PORT
 from models import Summary
 from database import Base , SessionLocal,engine
 from schemas import SummaryOut
@@ -80,7 +80,7 @@ app = FastAPI(lifespan=lifespan)
 
 # Configure CORS
 origins = [
-    "http://localhost:3000",  # The origin of your frontend
+    "*",  
 ]
 
 app.add_middleware(
@@ -97,3 +97,6 @@ async def get_summaries(db: Session = Depends(get_db)):
     logging.info("Stock summary sent to client ! ")
     return summaries
 
+
+if __name__ == "__main__":
+    uvicorn.run(app, host=HOST, port=PORT)

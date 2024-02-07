@@ -7,6 +7,8 @@ import os
 import numpy as np
 import threading
 
+from config import HOST,PORT
+
 # Set process affinity to a single core
 p = psutil.Process(os.getpid())
 p.cpu_affinity([0])  # Pin to the first core.
@@ -15,7 +17,7 @@ p.cpu_affinity([0])  # Pin to the first core.
 stocks = ["AAPL", "GOOGL", "AMZN", "MSFT", "TSLA"]
 
 # API endpoint to send the generated data
-api_endpoint = "http://localhost:5000/ingest/"
+api_endpoint = f"http://{HOST}:{PORT}/ingest/"
 
 
 def generate_data():

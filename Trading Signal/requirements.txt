@@ -5,4 +5,5 @@ asyncio==3.4.3
 packaging==23.2
 pydantic==2.6.0
 pydantic_core==2.16.1
+python-dotenv==1.0.1
 typing_extensions==4.9.0

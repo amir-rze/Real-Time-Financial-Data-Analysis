@@ -2,3 +2,4 @@ aiokafka==0.10.0
 async-timeout==4.0.3
 asyncio==3.4.3
 packaging==23.2
+python-dotenv==1.0.1

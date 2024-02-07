@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+
+  kafka-local:
+    image: wurstmeister/kafka
+    ports:
+      - "9097:9097"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    depends_on:
+      - zookeeper
+    
+  redis-local:
+    image: "redis:latest"
+    ports:
+      - "6389:6389"

@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: generation-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: generation
+  template:
+    metadata:
+      labels:
+        app: generation
+    spec:
+      containers:
+      - name: generation
+        image: amirrze/generation:v2.0.0
+        env:
+        - name: HOST
+          value: "ingestion-service"
+        - name: PORT
+          value: "8500"

@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: streaming-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: streaming
+  template:
+    metadata:
+      labels:
+        app: streaming
+    spec:
+      containers:
+      - name: streaming
+        image: amirrze/streaming:v2.0.0
+        env:
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "kafka-local:9092"
