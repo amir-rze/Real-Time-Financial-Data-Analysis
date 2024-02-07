@@ -13,6 +13,7 @@ topic_list.append(SIGNAL_KAFKA_TOPIC)
 
 logging.basicConfig(level=logging.INFO)
 
+
 async def client_handler(reader, writer):
     clients.add(writer)
     try:

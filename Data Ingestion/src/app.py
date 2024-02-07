@@ -76,6 +76,7 @@ async def ingest_data(
       db: Session = Depends(get_db)):
     
     if isinstance(data, DataIn):
+        # Added try except
         try:
             data=dict(data)
             score = data['timestamp'].timestamp()
@@ -98,6 +99,7 @@ async def ingest_data(
             # Send data to Stream Processing Service
             await send_data(data,DATA_KAFKA_TOPIC)
             return {"status" : 200 ,"message": "Data ingested successfully"}
+        # Added try-except clause    
         except Exception as e:
             db.rollback()
             raise HTTPException(status_code=500, detail=str(e))
